@@ -24,3 +24,9 @@ Unsupported TensorFlow Lite Ops:
 # Result 
 
 ![alt text](https://github.com/matteodalessio/CycleGAN-android/blob/master/pic/collage.jpg)
+
+# Reference
+
+- CycleGAN implementation: https://github.com/vanhuyz/CycleGAN-TensorFlow
+- CycleGAN paper: https://arxiv.org/abs/1703.10593
+
