@@ -67,15 +67,21 @@ import javax.net.ssl.HttpsURLConnection;
 import static java.net.Proxy.Type.HTTP;
 
 public class MainActivity extends AppCompatActivity {
+
     private ImageView imageView;
+
     private Button btnChoose, btnMonet, btnVangogh, btnUkiyoe;
+
     public static String BASE_URL = "http://192.168.1.66/api/upload.php";
     public static String CONVERT_URL = "http://192.168.1.66/api/convert.php?style=";
     public static String OUTPUT = "http://192.168.1.66/api/output.jpg";
     public String mCurrentPhotoPath;
+
     private Bitmap mImageBitmap;
+
     static final int PICK_IMAGE_REQUEST = 1;
     static final int REQUEST_IMAGE_CAPTURE = 2;
+    public int w, h;
 
     ProgressDialog progressBar;
     String filePath;
@@ -86,37 +92,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
-
-
 
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE },
                 1);
 
-
         sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(new File("/storage/emulated/0/Download/"))));
 
-
+        /* Collegamenti */
         imageView = (ImageView) findViewById(R.id.imageView);
-        imageView.setImageResource(R.drawable.placeholder);
         btnMonet = (Button) findViewById(R.id.btnMonet);
         btnVangogh = (Button) findViewById(R.id.btnVangogh);
         btnUkiyoe = (Button) findViewById(R.id.btnUkiyoe);
 
-
-
         btnMonet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (filePath != null) {
+                if (filePath != null)
+                {
                     monet_upload(filePath);
-                } else {
+                }
+                else
+                {
                     Toast.makeText(getApplicationContext(), "Image not selected!", Toast.LENGTH_LONG).show();
                 }
 
@@ -125,9 +126,12 @@ public class MainActivity extends AppCompatActivity {
         btnVangogh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (filePath != null) {
-                    Vangogh_upload(filePath);
-                } else {
+                if (filePath != null)
+                {
+                    vangogh_upload(filePath);
+                }
+                else
+                {
                     Toast.makeText(getApplicationContext(), "Image not selected!", Toast.LENGTH_LONG).show();
                 }
 
@@ -136,120 +140,136 @@ public class MainActivity extends AppCompatActivity {
         btnUkiyoe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (filePath != null) {
+                if (filePath != null)
+                {
                     ukiyoe_upload(filePath);
-                } else {
+                }
+                else
+                {
                     Toast.makeText(getApplicationContext(), "Image not selected!", Toast.LENGTH_LONG).show();
                 }
-
             }
         });
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
         int id = item.getItemId();
-        if(id == R.id.btnCamera){
-            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            if (cameraIntent.resolveActivity(getPackageManager()) != null) {
-                // Create the File where the photo should go
-                File photoFile = null;
-                try {
-                    photoFile = createImageFile();
-                } catch (IOException ex) {
-                    // Error occurred while creating the File
 
+        if(id == R.id.btnCamera)
+        {
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (cameraIntent.resolveActivity(getPackageManager()) != null)
+            {
+                File photoFile = null;
+                try
+                {
+                    photoFile = createImageFile();
                 }
-                // Continue only if the File was successfully created
-                if (photoFile != null) {
+                catch (IOException ex)
+                {}
+                if (photoFile != null)
+                {
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(photoFile));
                     startActivityForResult(cameraIntent, REQUEST_IMAGE_CAPTURE);
                 }
             }
         }
-        else if(id == R.id.btnChoose){
+
+        else if(id == R.id.btnChoose)
+        {
             Intent galleryIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(galleryIntent, PICK_IMAGE_REQUEST);
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK)
+        {
             if(requestCode == REQUEST_IMAGE_CAPTURE)
             {
-             //   Uri picUri = data.getData();
-              //  filePath = getPath(picUri);
-
-                try {
+                try
+                {
                     System.out.println(filePath);
                     mImageBitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.parse(mCurrentPhotoPath));
-
                     Uri uri = getImageUri(this, mImageBitmap);
                     filePath = getPath(uri);
-                    System.out.println("FILEPATH CAMERA: "+filePath);
+
+                    /* Estraggo dall'immagine originale le dimensioni per mantenere
+                     * lo stesso aspect ratio dell'immagine convertita */
+                    BitmapFactory.Options options = new BitmapFactory.Options();
+                    options.inJustDecodeBounds = true;
+                    BitmapFactory.decodeFile(filePath, options);
+                    w = options.outWidth;
+                    h = options.outHeight;
 
                     imageView.setImageBitmap(mImageBitmap);
 
-
-
-                } catch (IOException e) {
+                } catch (IOException e)
+                {
                     e.printStackTrace();
                 }
             }
-            else if(requestCode == PICK_IMAGE_REQUEST){
+            else if(requestCode == PICK_IMAGE_REQUEST)
+            {
                 Uri picUri = data.getData();
-
                 filePath = getPath(picUri);
-                Log.d("picUri", picUri.toString());
-                System.out.println("FILEPATH GALLERIA: "+filePath);
 
+                /* Estraggo dall'immagine originale le dimensioni per mantenere
+                 * lo stesso aspect ratio dell'immagine convertita */
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFile(filePath, options);
+                w = options.outWidth;
+                h = options.outHeight;
 
                 imageView.setImageURI(picUri);
-
             }
-
         }
-
     }
 
-
-    private void monet_upload(final String imagePath) {
-
+    private void monet_upload(final String imagePath)
+    {
         progress();
-        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, BASE_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-                            String message = jObj.getString("message");
+        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, BASE_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try
+                {
+                    JSONObject jObj = new JSONObject(response);
+                    String message = jObj.getString("message");
 
-                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
 
-                            String query = "monet";
-                            performPostCall(CONVERT_URL + Uri.encode(query));
-                            while(!exists(OUTPUT)) {}
+                    /* Setto lo stile che desidero */
+                    String query = "photo2monet";
+                    performPostCall(CONVERT_URL + Uri.encode(query));
 
+                    /* Attendo nel caricare l'immagine, finchè non viene generato l'output */
+                    while(!exists(OUTPUT)) {}
 
+                    /* Carico nella imageView, mantendo lo stesso rapporto prospettico */
+                    Picasso.get().load(OUTPUT).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).resize(w,h).into(imageView);
 
-                            Picasso.get().load(OUTPUT).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(imageView);
-
-                        } catch (JSONException e) {
-                            // JSON error
-                            e.printStackTrace();
-                            //Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }, new Response.ErrorListener() {
+                } catch (JSONException e)
+                {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        },  new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
@@ -258,35 +278,38 @@ public class MainActivity extends AppCompatActivity {
 
         smr.addFile("image", imagePath);
         MyApplication.getInstance().addToRequestQueue(smr);
-
     }
 
-
-    private void Vangogh_upload(final String imagePath) {
-
+    private void vangogh_upload(final String imagePath)
+    {
         progress();
-        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, BASE_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-                            String message = jObj.getString("message");
+        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, BASE_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try
+                {
+                    JSONObject jObj = new JSONObject(response);
+                    String message = jObj.getString("message");
 
-                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
 
-                            String query = "vangogh";
-                            performPostCall(CONVERT_URL + Uri.encode(query));
-                            while(!exists(OUTPUT)) {}
-                            Picasso.get().load(OUTPUT).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(imageView);
+                    /* Setto lo stile che desidero */
+                    String query = "photo2vangogh";
+                    performPostCall(CONVERT_URL + Uri.encode(query));
 
-                        } catch (JSONException e) {
-                            // JSON error
-                            e.printStackTrace();
-                            //Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }, new Response.ErrorListener() {
+                    /* Attendo nel caricare l'immagine, finchè non viene generato l'output */
+                    while(!exists(OUTPUT)) {}
+
+                    /* Carico nella imageView, mantendo lo stesso rapporto prospettico */
+                    Picasso.get().load(OUTPUT).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).resize(w,h).into(imageView);
+
+                } catch (JSONException e)
+                {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        },  new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
@@ -295,35 +318,38 @@ public class MainActivity extends AppCompatActivity {
 
         smr.addFile("image", imagePath);
         MyApplication.getInstance().addToRequestQueue(smr);
-
     }
 
-    private void ukiyoe_upload(final String imagePath) {
-
+    private void ukiyoe_upload(final String imagePath)
+    {
         progress();
-        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, BASE_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-                            String message = jObj.getString("message");
+        SimpleMultiPartRequest smr = new SimpleMultiPartRequest(Request.Method.POST, BASE_URL, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                try
+                {
+                    JSONObject jObj = new JSONObject(response);
+                    String message = jObj.getString("message");
 
-                            Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
 
-                            String query = "ukiyoe";
-                            performPostCall(CONVERT_URL + Uri.encode(query));
-                            while(!exists(OUTPUT)){}
+                    /* Setto lo stile che desidero */
+                    String query = "photo2ukiyoe";
+                    performPostCall(CONVERT_URL + Uri.encode(query));
 
-                            Picasso.get().load(OUTPUT).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(imageView);
+                    /* Attendo nel caricare l'immagine, finchè non viene generato l'output */
+                    while(!exists(OUTPUT)) {}
 
-                        } catch (JSONException e) {
-                            // JSON error
-                            e.printStackTrace();
-                            //Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }, new Response.ErrorListener() {
+                    /* Carico nella imageView, mantendo lo stesso rapporto prospettico */
+                    Picasso.get().load(OUTPUT).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).resize(w,h).into(imageView);
+
+                } catch (JSONException e)
+                {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
+        },  new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_LONG).show();
@@ -346,8 +372,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 1: {
                 if (grantResults.length > 0
@@ -401,8 +426,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public static boolean exists(String URLName){
-        try {
+    /* Esiste la risorsa che voglio mostrare nell'imageView? */
+    public static boolean exists(String URLName)
+    {
+        try
+        {
             HttpURLConnection.setFollowRedirects(false);
             // note : you may also need
             //        HttpURLConnection.setInstanceFollowRedirects(false)
@@ -411,7 +439,8 @@ public class MainActivity extends AppCompatActivity {
             con.setRequestMethod("HEAD");
             return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             e.printStackTrace();
             return false;
         }
@@ -437,24 +466,26 @@ public class MainActivity extends AppCompatActivity {
         }, TIME_OUT);
     }
 
-    private File createImageFile() throws IOException {
+    private File createImageFile() throws IOException
+    {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
-                imageFileName,  // prefix
-                ".jpg",         // suffix
-                storageDir      // directory
+                imageFileName,           // prefix
+                ".jpg",           // suffix
+                storageDir              // directory
         );
 
-        // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
     }
 
-    private Uri getImageUri(Context context, Bitmap inImage) {
+    /* Questa funzione serve per estrarre l'URI dal bitmap quando acquisisco la foto */
+    private Uri getImageUri(Context context, Bitmap inImage)
+    {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
         String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);

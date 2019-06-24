@@ -66,7 +66,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:cardCornerRadius="10dp"
+                app:cardCornerRadius="8dp"
                 app:cardElevation="0dp">
 
                 <ImageView
@@ -85,7 +85,7 @@
     </ScrollView>
 
 
-    </RelativeLayout>
+</RelativeLayout>
 
 
 
