@@ -12,7 +12,7 @@ My pretrained models: [Monet](https://mega.nz/#F!vZ51yQBR!aDzWzf9jDgoegUsFXpd7LQ
 
 Currently it is not possible to import the .pb model directly into Android, nor convert it to .tflite because Tensorflow Mobile doesn't support the map_fn node yet. 
 
-Unsupported Lite Ops:
+Unsupported TensorFlow Lite Ops:
 1. NonMaxSuppressionV2
 2. TensorArrayGatherV3
 3. TensorArrayReadV3
