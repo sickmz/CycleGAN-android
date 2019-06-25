@@ -1,8 +1,9 @@
 # CycleGAN-android
 Style transfer on Android with CycleGAN in TensorFlow, applying remote inference on a php server using [vanhuyz's](https://github.com/vanhuyz/CycleGAN-TensorFlow) implementation.
 
-# Pretrained models
+# Pretrained models/Checkpoints
 My pretrained models: [Monet](https://mega.nz/#F!vZ51yQBR!aDzWzf9jDgoegUsFXpd7LQ), [Cezanne](https://mega.nz/#F!iN5xASAK!i7vRSn_QEkC8ahxnzv5F9w), [Ukyoe](https://mega.nz/#F!mNhj2IJJ!_xU6BoD4f8B8XstsW6CDSw), [Vangogh](https://mega.nz/#F!iJxVCCAD!g8FZFmOjBHdFv8zvkZH7YA).
+Checkpoints: [Monet](https://mega.nz/#F!bBRk2AoA!_7Shwc6MNAIodnDPmz5BAQ), [Cezanne](https://mega.nz/#F!CBpXEAqI!LHzoynceBJxCL8Pqc92CeA), [Ukyoe](https://mega.nz/#F!iVR0ACRQ!gB2F9wYrgZv6RitQ7h-Hzw), [Vangogh](https://mega.nz/#F!LMgTXCpS!PtZ87RTay-SMVwRo_TO_9Q).
 
 # Environment
 - TensorFlow 1.0.0
